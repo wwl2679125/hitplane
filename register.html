@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="login.css">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <style>
+        body {
+            background-color: rgb(224, 223, 156);
+        }
+        #snow {
+            background: none;
+            background-image: url('s1.png'), url('s2.png'), url('s3.png');
+            height: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            z-index: -1;
+
+            animation: snow 10s linear infinite;  /*雪花移动速度*/
+        }
+        @keyframes snow {  /*添加动态效果，三张图片从哪里移动到哪里*/
+            0% {
+                background-position: 0px 0px, 0px 0px, 0px 0px;
+            }
+
+            100% {
+                background-position: 500px 1000px, 200px 400px, -100px 300px;
+            }
+        }
+    </style>
+<body>
+<div id="snow"></div>
+
+<header>
+    <div class="container">
+        <h1><span>打</span><span>飞</span><span>机</span></h1>
+    </div>
+</header>
+<div class="container">
+    <div class="directions">
+        <p><strong>请注册</strong></p>
+    </div>
+    <h1 class="content-title">创建账户</h1>
+    <div class="content-form">
+         <form>
+            <div id="change_margin_1">
+                <input class="user" type="text" name="user" placeholder="请输入用户名" id="user">
+            </div>
+            <!-- input的value为空时弹出提醒 -->
+            <p id="remind_1"></p>
+            <div id="change_margin_2">
+                <input class="password" type="password" name="password" placeholder="请输入密码" id="password">
+            </div>
+            <!-- input的value为空时弹出提醒 -->
+            <p id="remind_2"></p>
+            <div id="change_margin_3">
+                <input class="content-form-signup" type="submit" value="创建账户" id="register" onload="createTables()" onclick="save()" >
+            </div>
+    </div>
+    <div class="content-login-description">已经拥有账户？</div>
+    <div><a class="content-login-link" href="Login.html">登录</a></div>
+</div>
+<script src="L&S.js"></script>
+</body>
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+<script src="js/database.js"></script>
+<script>
+    $(function () {
+        $("#register").click(function () {
+            $.ajax({
+                url:"http://localhost:8080/register",
+                type:"POST",
+                data:{
+                    username:$("#user").val(),
+                    password:$("#password").val()
+                },
+                success:function (res) {
+                    if(res=="注册成功!") {
+                        alert("注册成功！");
+                    }
+                },
+                error:function (err) {
+                    console.log(err);
+                }
+            })
+        })
+    });
+</script>
+<script>
+    var db = openDatabase('informationdb','','local database demo',204800);
+    createTables();
+    function createTables(){
+        var query = 'create table if not exists game(user text,password text,score INTEGER,createtime INTEGER);';
+        try {
+            db.transaction(function(transaction){
+                transaction.executeSql(query, [], null, null);
+            });
+        }
+        catch (e) {
+            console.log("create table failed");
+            alert("建表失败");
+            return;
+        }
+    }
+    function delCookie(currentUser){
+        var exp = new Date();
+        exp.setTime(exp.getTime() - 1);
+        var cval=getCookie(currentUser);
+        if(cval!=null) document.cookie= currentUser + "="+cval+";expires="+exp.toGMTString();
+    }
+    /*function onSuccess(tx,rs){
+        alert("操作成功");
+    }
+    //sql语句执行失败后执行的回调函数
+    function onError(tx,error){
+        alert("操作失败，失败信息："+ error.message);
+    }
+
+    function save(){
+        var user_name = document.getElementById("user").value;
+        var password = document.getElementById("password").value;
+        var score = 0;
+        var time = new Date().getTime();
+        db.transaction(function(tx){
+            tx.executeSql('insert into game values(?,?,?,?)',[user_name,password,score,time],onSuccess,onError);
+        });
+    }*/
+</script>
+</html>
