@@ -43,7 +43,9 @@ function preload() {
     game.load.image('background', 'assets/background2.png');
 
 }
-
+var hendanshou = 200;
+var zidanshijian = -400;
+var diyumoshi = 150;
 var player;
 var aliens;
 var bullets;
@@ -65,10 +67,10 @@ function create() {
 
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
-    //  The scrolling starfield background
+    // 背景滚动
     starfield = game.add.tileSprite(0, 0, 800, 600, 'starfield');
 
-    //  Our bullet group
+
     bullets = game.add.group();
     bullets.enableBody = true;
     bullets.physicsBodyType = Phaser.Physics.ARCADE;
@@ -172,13 +174,12 @@ function descend() {
 
 function update() {
 
-    //  Scroll the background
+    // 背景滚动
     starfield.tilePosition.y += 2;
 
     if (player.alive)
     {
-        //  Reset the player, then check for movement keys
-        player.body.velocity.setTo(0, 0);
+        player.body.velocity.setTo(0, 0);//重置玩家飞机，检查移动键
 
         if (cursors.left.isDown)
         {
@@ -189,7 +190,7 @@ function update() {
             player.body.velocity.x = 200;
         }
 
-        //  Firing?
+
         if (fireButton.isDown)
         {
             fireBullet();
@@ -200,7 +201,7 @@ function update() {
             enemyFires();
         }
 
-        //  Run collision
+        //  碰撞检测
         game.physics.arcade.overlap(bullets, aliens, collisionHandler, null, this);
         game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
     }
@@ -218,22 +219,22 @@ function render() {
 
 function collisionHandler (bullet, alien) {
 
-    //  When a bullet hits an alien we kill them both
+    //子弹命中，消灭敌机
     bullet.kill();
     alien.kill();
 
-    //  Increase the score
+    //每架敌机得分+20
     score += 20;
     scoreText.text = scoreString + score;
 
-    //  And create an explosion :)
+    //  爆炸
     var explosion = explosions.getFirstExists(false);
     explosion.reset(alien.body.x, alien.body.y);
-    explosion.play('kaboom', 30, false, true);
+    explosion.play('kaboom', 60, false, true);
 
     if (aliens.countLiving() == 0)
     {
-        score += 1000;
+        score += 200;
         scoreText.text = scoreString + score;
 
         enemyBullets.callAll('kill',this);
@@ -249,7 +250,7 @@ function collisionHandler (bullet, alien) {
             });
       //  }
        // alert(scoreText.text);
-        //the "click to restart" handler
+        //重开
         game.input.onTap.addOnce(restart,this);
     }
 
@@ -266,12 +267,12 @@ function enemyHitsPlayer (player,bullet) {
         live.kill();
     }
 
-    //  And create an explosion :)
+    //  爆炸
     var explosion = explosions.getFirstExists(false);
     explosion.reset(player.body.x, player.body.y);
-    explosion.play('kaboom', 30, false, true);
+    explosion.play('kaboom', 10, false, true);
 
-    // When the player dies
+    // 敌机死亡
     if (lives.countLiving() < 1)
     {
         player.kill();
@@ -288,7 +289,7 @@ function enemyHitsPlayer (player,bullet) {
                 //alert(score);
             });
       //  }
-        //the "click to restart" handler
+        //重开
         game.input.onTap.addOnce(restart,this);
     }
 
@@ -296,14 +297,14 @@ function enemyHitsPlayer (player,bullet) {
 
 function enemyFires () {
 
-    //  Grab the first bullet we can from the pool
+    // 敌机开火
     enemyBullet = enemyBullets.getFirstExists(false);
 
     livingEnemies.length=0;
 
     aliens.forEachAlive(function(alien){
 
-        // put every living enemy in an array
+//还没死的敌机重新排列数组
 
         livingEnemies.push(alien);
     });
@@ -314,56 +315,52 @@ function enemyFires () {
         
         var random=game.rnd.integerInRange(0,livingEnemies.length-1);
 
-        // randomly select one of them
+        // 随机开火
         var shooter=livingEnemies[random];
-        // And fire the bullet from this enemy
         enemyBullet.reset(shooter.body.x, shooter.body.y);
 
         game.physics.arcade.moveToObject(enemyBullet,player,120);
-        firingTimer = game.time.now + 2000;
+        firingTimer = game.time.now + diyumoshi;
     }
 
 }
 
 function fireBullet () {
 
-    //  To avoid them being allowed to fire too fast we set a time limit
+    //
     if (game.time.now > bulletTime)
     {
-        //  Grab the first bullet we can from the pool
         bullet = bullets.getFirstExists(false);
 
         if (bullet)
         {
-            //  And fire it
+            //  开火时间限定
             bullet.reset(player.x, player.y + 8);
-            bullet.body.velocity.y = -400;
-            bulletTime = game.time.now + 200;
+            bullet.body.velocity.y = zidanshijian;
+            bulletTime = game.time.now + hendanshou;
         }
     }
 
 }
-
 function resetBullet (bullet) {
 
-    //  Called if the bullet goes out of the screen
+    //  子弹从屏幕上消失
     bullet.kill();
 
 }
 
 function restart () {
 
-    //  A new level starts
+
     
-    //resets the life count
-    lives.callAll('revive');
-    //  And brings the aliens back from the dead :)
-    aliens.removeAll();
+
+    lives.callAll('revive');//生命重置
+
+    aliens.removeAll();//敌机重置
     createAliens();
 
-    //revives the player
     player.revive();
-    //hides the text
+
     stateText.visible = false;
 
 }
@@ -383,5 +380,8 @@ function restart () {
                 if(cval!=null) document.cookie= currentUser + "="+cval+";expires="+exp.toGMTString();
             }
         </script>
+        <button onclick="zidanshijian = -400,diyumoshi = 900,hendanshou =  200;">简单</button>
+        <button onclick="zidanshijian = -200,diyumoshi = 200,hendanshou =  800;">一般</button>
+        <button onclick="zidanshijian = -100,diyumoshi = 100,hendanshou = 1400;">困难</button>
     </body>
 </html>
